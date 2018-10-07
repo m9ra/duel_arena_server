@@ -1,0 +1,56 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}Arena{% endblock %}
+
+
+{% block head %}
+{{super()}}
+{% block favicon %}
+<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">{% endblock %}
+{% endblock %}
+
+
+{% block content %}
+<div class="container">
+    <h1>Arena</h1>
+
+    <div class="row">
+        <div class="col-3"></div>
+        <div class="col-6">
+            <table id="results_table" class="table">
+                <thead>
+                <tr>
+                    <th scope="col">User</th>
+                    <th scope="col">Rating</th>
+                    <th scope="col">Score</th>
+                    <th scope="col">Online Time</th>
+                    <th scope="col">Total Games</th>
+                    <th scope="col">Invalid Moves</th>
+                </tr>
+                </thead>
+                {% for r in scores %}
+                <tr>
+                    <td>{{r.username}}</td>
+                    <td>{{'%0.0f' % r.rating}}</td>
+                    <td>{{r.wins}}</td>
+                    <td>{{r.total_time}}</td>
+                    <td>{{r.total_games}}</td>
+                    <td>{{r.invalid_moves}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        <div class="col-3"></div>
+
+        <script language="JavaScript">
+setInterval(function() {
+    $('#results_table').load('/results_table');
+}, 1000)
+
+        </script>
+
+    </div>
+
+</div>
+
+{% endblock %}

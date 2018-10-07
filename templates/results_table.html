@@ -1,0 +1,22 @@
+<thead>
+<tr>
+    <th scope="col">User</th>
+    <th scope="col">Rating</th>
+    <th scope="col">Score</th>
+    <th scope="col">Online Time</th>
+    <th scope="col">Total Games</th>
+    <th scope="col">Invalid Moves</th>
+</tr>
+</thead>
+{% for r in scores %}
+<tr>
+    <td>{{r.username}}</td>
+    <td>{{'%0.0f' % r.rating}}</td>
+    <td>{{r.wins}}</td>
+    <td>{{r.total_time}}</td>
+    <td>{{r.total_games}}</td>
+    <td>{{r.invalid_moves}}</td>
+</tr>
+{% endfor %}
+
+
