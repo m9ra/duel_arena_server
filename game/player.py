@@ -55,7 +55,7 @@ class Player(SocketClient):
 
     def get_move(self, board, timeout):
         move_id = f"{datetime.datetime.now().timestamp()}-{random.randint(0,100000)}"
-        self.send_json({"event": "get_move", "id": move_id, "board": board.to_json()})
+        self.send_json({"event": "get_move", "id": move_id, "board": board.serialize()})
 
         start = time.time()
 

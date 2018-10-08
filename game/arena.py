@@ -48,7 +48,7 @@ class Arena(object):
         worker.execute(self._report_win, winner, looser, board)
 
     def _report_invalid_move(self, player, x, y, board):
-        player.send_json({"event": "invalid_move", "x": x, "y": y, "board": board.to_json()})
+        player.send_json({"event": "invalid_move", "x": x, "y": y, "board": board.serialize()})
         with self._L_collection:
             self._collection.players.update({"_id": player.username}, {
                 "$inc": {
@@ -57,7 +57,7 @@ class Arena(object):
             }, upsert=True)
 
     def _report_win(self, winner, looser, board):
-        winner.send_json({"event": "win", "board": board.to_json()})
+        winner.send_json({"event": "win", "board": board.serialize()})
 
         with self._L_collection:
             rating_winner = self._get_rating(winner)
@@ -79,7 +79,7 @@ class Arena(object):
                 }
             }, upsert=True)
 
-        looser.send_json({"event": "lose", "board": board.to_json()})
+        looser.send_json({"event": "lose", "board": board.serialize()})
         with self._L_collection:
             self._collection.players.update({"_id": looser.username}, {
                 "$inc": {
