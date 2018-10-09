@@ -30,6 +30,10 @@ class Board(object):
                 self.try_make_move(x, y)
 
     @property
+    def id(self):
+        return self._id
+
+    @property
     def size(self):
         return self._size
 
@@ -52,6 +56,15 @@ class Board(object):
     @property
     def is_win(self):
         return self._is_win
+
+    @property
+    def moves(self):
+        return list(self._moves)
+
+    @classmethod
+    def initialize_id(cls, id_lower_bound):
+        with Board._L_id:
+            Board._next_id = max(Board._next_id, id_lower_bound + 1)
 
     def try_make_move(self, x, y):
         if self.is_game_over:

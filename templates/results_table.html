@@ -9,7 +9,7 @@
 </tr>
 </thead>
 {% for r in scores %}
-<tr>
+<tr class="clickable-row" data-href="/profile/{{r.username}}">
     <td>{{r.username}}</td>
     <td>{{'%0.0f' % r.rating}}</td>
     <td>{{r.wins}}</td>

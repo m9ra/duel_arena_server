@@ -4,7 +4,7 @@ import random
 import time
 import traceback
 from queue import Queue
-from threading import Thread, RLock
+from threading import Thread
 
 from networking.socket_client import SocketClient
 

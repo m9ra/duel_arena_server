@@ -6,6 +6,7 @@ from pymongo import MongoClient
 
 from configuration import PAIRING_TRIGGER_DELAY
 from events import worker
+from game.board import Board
 from game.room import Room
 
 _db_name = "arena"
@@ -17,6 +18,7 @@ class Arena(object):
     def __init__(self, name):
         self._collection = _db[name]
         # self._collection.players.delete_many({})
+        # self._collection.boards.delete_many({})
         self._L_collection = RLock()
         self._name = name
         self._free_players = []
@@ -25,12 +27,31 @@ class Arena(object):
         self._rooms = []
         self._last_time_check = time.time()
 
+        Board.initialize_id(self._get_highest_board_id())
+
         worker.set_timer(PAIRING_TRIGGER_DELAY, self._run_pairing)
         worker.set_timer(1.0, self._count_online_time)
 
     def load_players(self):
         with self._L_collection:
             return list(self._collection.players.find({}))
+
+    def get_history(self, username=None):
+        with self._L_collection:
+            if username:
+                query = {"$or": [{"player1": username}, {"player2": username}]}
+            else:
+                query = {}
+
+            return list(
+                self._collection.boards
+                    .find(query)
+                    .sort("start_time", -1).limit(100)
+            )
+
+    def get_board(self, board_id):
+        with self._L_collection:
+            return self._collection.boards.find_one({"_id": board_id})
 
     def register_player(self, player):
         worker.execute(self._register_player, player)
@@ -47,6 +68,55 @@ class Arena(object):
     def report_win(self, winner, looser, board):
         worker.execute(self._report_win, winner, looser, board)
 
+    def report_board_started(self, board, player1, player2):
+        rating1 = self.get_rating(player1)
+        rating2 = self.get_rating(player2)
+
+        worker.execute(self._report_board_started, board, player1, rating1, player2, rating2)
+
+    def report_move(self, board):
+        worker.execute(self._report_move, board, board.moves[-1])
+
+    def report_board_finished(self, board):
+        worker.execute(self._report_board_finished, board)
+
+    def _get_highest_board_id(self):
+        with self._L_collection:
+            for board in self._collection.boards.find({}).sort("_id", -1).limit(1):
+                return board["_id"]
+
+        return 0
+
+    def _report_board_started(self, board, player1, rating1, player2, rating2):
+        with self._L_collection:
+            self._collection.boards.insert({
+                "_id": board.id,
+                "player1": player1.username,
+                "player2": player2.username,
+                "rating1": rating1,
+                "rating2": rating2,
+                "start_time": time.time(),
+                "end_time": None,
+                "moves": []
+            })
+
+    def _report_move(self, board, move):
+        with self._L_collection:
+            self._collection.boards.update(
+                {"_id": board.id},
+                {"$push": {
+                    "moves": move
+                }}
+            )
+
+    def _report_board_finished(self, board):
+        self._collection.boards.update(
+            {"_id": board.id},
+            {"$set": {
+                "end_time": time.time()
+            }}
+        )
+
     def _report_invalid_move(self, player, x, y, board):
         player.send_json({"event": "invalid_move", "x": x, "y": y, "board": board.serialize()})
         with self._L_collection:
@@ -60,8 +130,8 @@ class Arena(object):
         winner.send_json({"event": "win", "board": board.serialize()})
 
         with self._L_collection:
-            rating_winner = self._get_rating(winner)
-            rating_looser = self._get_rating(looser)
+            rating_winner = self.get_rating(winner)
+            rating_looser = self.get_rating(looser)
 
             p1 = self._expected_win_probability(rating_winner, rating_looser)
             p2 = self._expected_win_probability(rating_looser, rating_winner)
@@ -91,7 +161,8 @@ class Arena(object):
                 }
             }, upsert=True)
 
-        # todo calculate rating
+        with self._L_collection:
+            self._collection.boards.update({"_id": board.id}, {"$set": {"winner": winner.username}})
 
     def _register_player(self, player):
         if not player.is_connected:
@@ -183,6 +254,11 @@ class Arena(object):
     def _expected_win_probability(self, rating1, rating2):
         return (1.0 / (1.0 + pow(10, ((rating2 - rating1) / 400))))
 
-    def _get_rating(self, player):
+    def get_rating(self, player):
         with self._L_collection:
-            return self._collection.players.find_one({"_id": player.username})["rating"]
+            if isinstance(player, str):
+                username = player
+            else:
+                username = player.username
+
+            return self._collection.players.find_one({"_id": username})["rating"]

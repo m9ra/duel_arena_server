@@ -34,9 +34,12 @@ class Room():
 
     def _play_board(self, player1, player2):
         board = Board(BOARD_SIZE, WIN_LENGTH)
+        self._arena.report_board_started(board, player1, player2)
         while not board.is_game_over:
             self._play_turn(player1, board)
             self._play_turn(player2, board)
+
+        self._arena.report_board_finished(board)
 
     def _play_turn(self, player, board):
         if board.is_game_over:
@@ -49,7 +52,11 @@ class Room():
             # invalid move or disconnection
             self._arena.report_invalid_move(player, x, y, board)
             self._arena.report_win(other_player, player, board)
-        elif board.is_win:
+            return
+
+        self._arena.report_move(board)
+
+        if board.is_win:
             self._arena.report_win(player, other_player, board)
 
     def _other(self, player):

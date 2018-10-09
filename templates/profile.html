@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+
+{% block title %}{% if player %}
+Profile
+{% else %}
+History
+{% endif %}
+{% endblock %}
+
+
+{% block content %}
+<div class="container">
+    {% if player %}
+    <div class="row">
+        <h1>Profile: <b>{{player}}</b></h1>
+        <h3>rating: <b>{{rating | int}}</b></h3>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <h2>Boards played</h2>
+
+        <div class="col-3"></div>
+        <div class="col-6">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">Game Start</th>
+                    <th scope="col">Cross Player</th>
+                    <th scope="col">Circle Player</th>
+                    <th scope="col">Move Count</th>
+
+                    {% if username %}
+                    <th scope="col">Result</th>
+                    {% else %}
+                    <th scope="col">Winner</th>
+                    {% endif %}
+                </tr>
+                </thead>
+                {% for b in history %}
+                <tr class="clickable-row" data-href="/board/{{b._id}}">
+                    <td>{{b.start_time | ctime}}</td>
+                    <td>{{b.player1}} ({{b.rating1 | int}})</td>
+                    <td>{{b.player2}} ({{b.rating2 | int}})</td>
+                    <td>{{b.moves | length}}</td>
+                    <td>
+                        {% if username %}
+
+                        {% if not b.end_time %}
+                        <span style="color:blue">in progress</span>
+                        {% elif b.winner == player %}
+                        <span style="color:green">won</span>
+                        {% elif not b.winner %}
+                        <span style="color:gray">draw</span>
+                        {% else %}
+                        <span style="color:red">lost</span>
+                        {% endif %}
+
+                        {% else %}
+                        {% if not b.end_time %}
+                        <span style="color:blue">in progress</span>
+                        {% else %}
+                        <span style="color:gray">{{b.winner}}</span>
+                        {% endif %}
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        <div class="col-3"></div>
+
+    </div>
+</div>
+
+{% endblock %}

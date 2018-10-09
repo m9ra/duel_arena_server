@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}Board{% endblock %}
+
+
+{% block content %}
+<div class="container">
+
+    <div class="row">
+        <h1>Board {{b._id}}</h1>
+        <h2>Winner: {{b.winner}}</h2>
+        <h3><a href="/profile/{{b.player1}}">Cross: {{b.player1}} ({{b.rating1 | int}})</a></h3>
+        <h3><a href="/profile/{{b.player2}}">Circle: {{b.player2}} ({{b.rating2 | int}})</a></h3>
+        <h3>Start: {{b.start_time | ctime}}</h3>
+        <h3>End: {{b.end_time | ctime}}</h3>
+        <h3>Move count: {{b.moves | length}}</h3>
+
+
+        <div class="col-3"></div>
+        <div class="col-6">
+            {{b.moves}}
+        </div>
+        <div class="col-3"></div>
+
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,4 +1,7 @@
-from flask import Flask, render_template, request, flash, redirect, url_for
+import datetime
+import time
+
+from flask import Flask, render_template, request
 from flask_bootstrap import Bootstrap
 
 from networking.server import Server
@@ -12,16 +15,43 @@ app.secret_key = b'fer234\n\xec]/'
 Bootstrap(app)
 
 
-@app.route("/")
-def index():
-    scores = ScoreRecord.load_for(server.arena)
-    return render_template("index.html", scores=scores)
+@app.route("/board/<int:id>")
+def board(id):
+    board = server.arena.get_board(id)
+    return render_template("board.html", b=board)
+
+
+@app.route("/profile/<player>")
+def profile(player):
+    history = server.arena.get_history(player)
+    rating = server.arena.get_rating(player)
+    return render_template("profile.html", player=player, rating=rating, history=history)
+
+
+@app.route("/history")
+def history():
+    history = server.arena.get_history()
+    return render_template("profile.html", history=history)
 
 
 @app.route("/results_table")
 def results_table():
     scores = ScoreRecord.load_for(server.arena)
     return render_template("results_table.html", scores=scores)
+
+
+@app.route("/")
+def index():
+    scores = ScoreRecord.load_for(server.arena)
+    return render_template("index.html", scores=scores)
+
+
+@app.template_filter('ctime')
+def timectime(s):
+    if not s:
+        return None
+
+    return datetime.datetime.fromtimestamp(s).strftime("%Y-%m-%d %H:%M:%S")
 
 
 if __name__ == "__main__":
