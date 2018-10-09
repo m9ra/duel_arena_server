@@ -42,12 +42,8 @@ class Arena(object):
                 query = {"$or": [{"player1": username}, {"player2": username}]}
             else:
                 query = {}
-
-            return list(
-                self._collection.boards
-                    .find(query)
-                    .sort("start_time", -1).limit(100)
-            )
+            cursor = self._collection.boards.find(query)
+            return list(cursor.sort("start_time", -1).limit(100)), cursor.count()
 
     def get_board(self, board_id):
         with self._L_collection:

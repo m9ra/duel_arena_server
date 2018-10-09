@@ -23,15 +23,15 @@ def board(id):
 
 @app.route("/profile/<player>")
 def profile(player):
-    history = server.arena.get_history(player)
+    history, board_count = server.arena.get_history(player)
     rating = server.arena.get_rating(player)
-    return render_template("profile.html", player=player, rating=rating, history=history)
+    return render_template("profile.html", player=player, rating=rating, history=history, board_count=board_count)
 
 
 @app.route("/history")
 def history():
-    history = server.arena.get_history()
-    return render_template("profile.html", history=history)
+    history, board_count = server.arena.get_history()
+    return render_template("profile.html", history=history, board_count=board_count)
 
 
 @app.route("/results_table")

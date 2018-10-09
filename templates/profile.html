@@ -18,7 +18,7 @@ History
     {% endif %}
 
     <div class="row">
-        <h2>Boards played</h2>
+        <h2>Boards played ({{board_count}})</h2>
 
         <div class="col-3"></div>
         <div class="col-6">
@@ -44,7 +44,7 @@ History
                     <td>{{b.player2}} ({{b.rating2 | int}})</td>
                     <td>{{b.moves | length}}</td>
                     <td>
-                        {% if username %}
+                        {% if player %}
 
                         {% if not b.end_time %}
                         <span style="color:blue">in progress</span>
