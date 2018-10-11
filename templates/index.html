@@ -4,17 +4,23 @@
 
 
 {% block content %}
-<div class="container">
+<div class="container-fluid" style="margin-left:20px">
 
     <div class="row">
-        <h1>Arena</h1>
 
-        <div class="col-3"></div>
-        <div class="col-6">
+        <div class="col-md-3">
+            <div id="live_board1" class="live_board"></div>
+        </div>
+
+        <div class="col-md-6">
+            <h1>Arena</h1>
+
             <table id="results_table" class="table table-hover">
             </table>
         </div>
-        <div class="col-3"></div>
+        <div class="col-md-3">
+            <div id="live_board2" class="live_board"></div>
+        </div>
 
         <script language="JavaScript">
 function loadTable(){
@@ -26,6 +32,12 @@ function loadTable(){
 }
 setInterval(loadTable, 1000)
 loadTable();
+
+var b1=Board('live_board1');
+b1.follow();
+
+var b2=Board('live_board2');
+b2.follow();
 
 
 

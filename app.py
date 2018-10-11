@@ -1,13 +1,16 @@
 import datetime
+import json
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_bootstrap import Bootstrap
 
 from networking.server import Server
 from score_record import ScoreRecord
 
+server_port_start = 5225
+
 server = Server()
-server.listen(5226)
+server.listen(server_port_start + 1)
 
 app = Flask(__name__)
 app.secret_key = b'fer234\n\xec]/'
@@ -18,6 +21,14 @@ Bootstrap(app)
 def board(id):
     board = server.arena.get_board(id)
     return render_template("board.html", b=board)
+
+
+@app.route("/live_board")
+def live_board():
+    id = request.args.get("id")
+    move = request.args.get("move")
+
+    return json.dumps(server.arena.get_live_board(id, move, 5.0))
 
 
 @app.route("/profile/<player>")
@@ -54,4 +65,4 @@ def timectime(s):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False, host='0.0.0.0', port=5233)
+    app.run(debug=False, use_reloader=False, host='0.0.0.0', port=5233)

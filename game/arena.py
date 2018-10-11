@@ -1,6 +1,7 @@
+import copy
 import random
 import time
-from threading import RLock
+from threading import RLock, Condition
 
 from pymongo import MongoClient
 
@@ -21,11 +22,13 @@ class Arena(object):
         # self._collection.boards.delete_many({})
         self._collection.boards.delete_many({"end_time": None})
         self._L_collection = RLock()
+        self._L_live_condition = Condition()
         self._name = name
         self._free_players = []
         self._playing_players = []
         self._players = {}
         self._rooms = []
+        self._live_boards = {}
         self._last_time_check = time.time()
 
         Board.initialize_id(self._get_highest_board_id())
@@ -50,6 +53,29 @@ class Arena(object):
     def get_board(self, board_id):
         with self._L_collection:
             return self._collection.boards.find_one({"_id": board_id})
+
+    def get_live_board(self, board_id, move_id, timeout):
+        with self._L_live_condition:
+            if board_id is None:
+                # live board request
+                if len(self._live_boards) == 0:
+                    self._L_live_condition.wait(timeout)
+
+                return {"boards": self._live_boards}
+
+            board_id = int(board_id)
+            move_id = int(move_id)
+            start = time.time()
+            while time.time() - start < timeout:
+                if board_id not in self._live_boards:
+                    # board is no more alive
+                    return {"finished_board": self.get_board(board_id)}
+
+                moves = self._live_boards[board_id]["moves"][move_id:]
+                if moves:
+                    return {"moves": moves}
+
+                self._L_live_condition.wait(timeout)
 
     def register_player(self, player):
         worker.execute(self._register_player, player)
@@ -87,7 +113,7 @@ class Arena(object):
 
     def _report_board_started(self, board, player1, rating1, player2, rating2):
         with self._L_collection:
-            self._collection.boards.insert({
+            board_data = {
                 "_id": board.id,
                 "player1": player1.username,
                 "player2": player2.username,
@@ -96,7 +122,13 @@ class Arena(object):
                 "start_time": time.time(),
                 "end_time": None,
                 "moves": []
-            })
+            }
+            self._collection.boards.insert(copy.copy(board_data))
+
+        with self._L_live_condition:
+            self._live_boards[board.id] = board_data
+            board_data["is_live"] = True
+            self._L_live_condition.notify_all()
 
     def _report_move(self, board, move):
         with self._L_collection:
@@ -106,14 +138,22 @@ class Arena(object):
                     "moves": move
                 }}
             )
+        with self._L_live_condition:
+            self._live_boards[board.id]["moves"].append(move)
+            self._L_live_condition.notify_all()
 
     def _report_board_finished(self, board):
-        self._collection.boards.update(
-            {"_id": board.id},
-            {"$set": {
-                "end_time": time.time()
-            }}
-        )
+        with self._L_collection:
+            self._collection.boards.update(
+                {"_id": board.id},
+                {"$set": {
+                    "end_time": time.time()
+                }}
+            )
+
+        with self._L_live_condition:
+            del self._live_boards[board.id]
+            self._L_live_condition.notify_all()
 
     def _report_invalid_move(self, player, x, y, board):
         player.send_json({"event": "invalid_move", "x": x, "y": y, "board": board.serialize()})
