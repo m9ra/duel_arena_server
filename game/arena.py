@@ -19,6 +19,7 @@ class Arena(object):
         self._collection = _db[name]
         # self._collection.players.delete_many({})
         # self._collection.boards.delete_many({})
+        self._collection.boards.delete_many({"end_time": None})
         self._L_collection = RLock()
         self._name = name
         self._free_players = []
@@ -43,6 +44,7 @@ class Arena(object):
             else:
                 query = {}
             cursor = self._collection.boards.find(query)
+            print(cursor.explain())
             return list(cursor.sort("start_time", -1).limit(100)), cursor.count()
 
     def get_board(self, board_id):

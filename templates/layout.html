@@ -5,6 +5,9 @@
 {% block favicon %}
 <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 {% endblock %}
+
+ <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script>
 $(document).ready(function($) {
@@ -12,12 +15,6 @@ $(document).ready(function($) {
         window.location = $(this).data("href");
     });
 });
-
-
-
-
-
-
 </script>
 {% endblock %}
 

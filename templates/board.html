@@ -8,21 +8,76 @@
 
     <div class="row">
         <h1>Board {{b._id}}</h1>
-        <h2>Winner: {{b.winner}}</h2>
-        <h3><a href="/profile/{{b.player1}}">Cross: {{b.player1}} ({{b.rating1 | int}})</a></h3>
-        <h3><a href="/profile/{{b.player2}}">Circle: {{b.player2}} ({{b.rating2 | int}})</a></h3>
-        <h3>Start: {{b.start_time | ctime}}</h3>
-        <h3>End: {{b.end_time | ctime}}</h3>
-        <h3>Move count: {{b.moves | length}}</h3>
-
-
-        <div class="col-3"></div>
-        <div class="col-6">
-            {{b.moves}}
+        {% if b.winner %}
+        <h2><b>{{b.winner}}</b> wins with {% if b.winner == b.player1 %}crosses{% else %}circles{% endif %}</h2>
+        {% endif %}
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div id="board" style="width:100%"></div>
         </div>
-        <div class="col-3"></div>
+        <div class="col-md-6">
+            <h3><a href="/profile/{{b.player1}}">Crosses: {{b.player1}} ({{b.rating1 | int}})</a></h3>
+            <h3><a href="/profile/{{b.player2}}">Circles: {{b.player2}} ({{b.rating2 | int}})</a></h3>
+            <h3>Start: {{b.start_time | ctime}}</h3>
+            <h3>End: {{b.end_time | ctime}}</h3>
+            <h3>Move count: {{b.moves | length}}</h3>
+            <div style="margin-top:50px">
+                <h2>Explore moves:</h2>
+                <div>
+                    <div>
+                        <button class="btn btn-success" onclick="board.firstMove()" style="margin:10px;width:300px">
+                            First Move
+                        </button>
+                    </div>
+                    <div>
+                        <button class="btn btn-success" onclick="board.lastMove()" style="margin:10px;width:300px">Last
+                            Move
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="board.previousMove()" style="margin:10px;width:140px">
+                        Previous Move
+                    </button>
+
+                    <button class="btn btn-primary" onclick="board.nextMove()" style="margin:10px;width:140px">Next
+                        Move
+                    </button>
+                </div>
+            </div>
+        </div>
 
 
+        <script src="{{ url_for('static', filename='board.js') }}"></script>
+        <script>
+            var moves = {{b.moves}};
+            var board = Board('board');
+            board.loadMoves(moves);
+
+            $(document).keydown(function(e){
+                switch(e.which) {
+                    case 37: // left
+                    board.previousMove();
+                    break;
+
+                    case 38: // up
+                    board.lastMove();
+                    break;
+
+                    case 39: // right
+                    board.nextMove();
+                    break;
+
+                    case 40: // down
+                    board.firstMove();
+                    break;
+
+                    default: return; // exit this handler for other keys
+                }
+                e.preventDefault(); // prevent the default action (scroll / move caret)
+            });
+        </script>
     </div>
 
 </div>
