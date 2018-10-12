@@ -2,7 +2,7 @@ import datetime
 import json
 import sys
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, make_response
 from flask_bootstrap import Bootstrap
 
 from networking.server import Server
@@ -34,7 +34,11 @@ def live_board():
     id = request.args.get("id")
     move = request.args.get("move")
 
-    return json.dumps(server.arena.get_live_board(id, move, 5.0))
+    r = make_response(json.dumps(server.arena.get_live_board(id, move, 5.0)))
+    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    r.headers["Pragma"] = "no-cache"
+    r.headers["Expires"] = "0"
+    return r
 
 
 @app.route("/profile/<player>")
