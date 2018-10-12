@@ -143,7 +143,7 @@ Board = function(target_element_id){
         }
 
         var fields=[];
-        while(x+xdir>=0 && y+ydir>=0 && x+xdir<=15 && y+ydir<=15){
+        while(x>=0 && y>=0 && x<=15 && y<=15){
             fields.push([x,y]);
             var x=x+xdir;
             var y=y+ydir;
