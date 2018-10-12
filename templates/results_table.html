@@ -4,13 +4,21 @@
     <th scope="col">Rating</th>
     <th scope="col">Score</th>
     <th scope="col">Online Time</th>
-    <th scope="col">Total Games</th>
+    <th scope="col">Total Boards</th>
     <th scope="col">Invalid Moves</th>
 </tr>
 </thead>
 {% for r in scores %}
 <tr class="clickable-row" data-href="/profile/{{r.username}}">
-    <td>{{r.username}}</td>
+    <td>
+        {% if r.is_online %}
+        <img src="/static/online-icon.png" class="status_icon">
+        {% else %}
+        <img src="/static/offline-icon.png" class="status_icon">
+        {% endif %}
+
+        {{r.username}}
+    </td>
     <td>{{'%0.0f' % r.rating}}</td>
     <td>{{r.wins}}</td>
     <td>{{r.total_time}}</td>

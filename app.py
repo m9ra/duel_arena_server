@@ -59,7 +59,7 @@ def results_table():
 @app.route("/")
 def index():
     scores = ScoreRecord.load_for(server.arena)
-    return render_template("index.html", scores=scores)
+    return render_template("index.html", scores=scores, arena=server.arena.name, port=arena_port)
 
 
 @app.template_filter('ctime')

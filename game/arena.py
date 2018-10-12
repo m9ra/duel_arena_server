@@ -36,9 +36,17 @@ class Arena(object):
         worker.set_timer(PAIRING_TRIGGER_DELAY, self._run_pairing)
         worker.set_timer(1.0, self._count_online_time)
 
+    @property
+    def name(self):
+        return self._name
+
     def load_players(self):
         with self._L_collection:
-            return list(self._collection.players.find({}))
+            online_info = {}
+            for player in self._players.values():
+                online_info[player.username] = player.is_connected
+                
+            return list(self._collection.players.find({})), online_info
 
     def get_history(self, username=None):
         with self._L_collection:
@@ -206,18 +214,19 @@ class Arena(object):
         if not player.is_connected:
             return
 
-        old_player = self._players.get(player.username, None)
-        if old_player:
-            old_player.disconnect()
-
-        self._players[player.username] = player
-
         with self._L_collection:
+            old_player = self._players.get(player.username, None)
+
+            self._players[player.username] = player
+
             self._ensure_default(player, "rating", 1200)
             self._ensure_default(player, "wins", 0)
             self._ensure_default(player, "invalid_moves", 0)
             self._ensure_default(player, "total_seconds", 0)
             self._ensure_default(player, "total_games", 0)
+
+        if old_player:
+            old_player.disconnect()
 
         self._report_player_is_free(player)
 
@@ -252,9 +261,9 @@ class Arena(object):
         extra_time = current_time - self._last_time_check
         self._last_time_check = current_time
 
-        for player in self._players.values():
-            if player.is_connected:
-                with self._L_collection:
+        with self._L_collection:
+            for player in self._players.values():
+                if player.is_connected:
                     self._collection.players.update({"_id": player.username}, {
                         "$inc": {
                             "total_seconds": extra_time,
