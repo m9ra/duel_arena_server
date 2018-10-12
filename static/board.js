@@ -51,7 +51,9 @@ Board = function(target_element_id){
 
             if(replayDirection>=0){
                 cell.className=self._current_move_index % 2 == 0 ? 'board_cell_cross' : 'board_cell_circle';
+                self._tryMarkWin(x,y);
             }else{
+                $("#"+target_element_id).find(".winning_move").removeClass("winning_move");
                 cell.className="";
             }
 
@@ -113,9 +115,65 @@ Board = function(target_element_id){
             cell.className="";
         }
 
+        $("#"+target_element_id).find(".winning_move").removeClass("winning_move");
         self._moves=[]
         self._current_move_index=0;
         self.players("","");
+    }
+
+    self._tryMarkWin=function(x,y){
+        self._tryMarkWinDirection(x,y,1,0);
+        self._tryMarkWinDirection(x,y,1,1);
+        self._tryMarkWinDirection(x,y,0,1);
+        self._tryMarkWinDirection(x,y,-1,1);
+    }
+
+    self._tryMarkWinDirection=function(x,y,xdir, ydir){
+        var targetColor=self._getColor(x,y);
+
+        // find start of the direction
+        while(x+xdir>=0 && y+ydir>=0 && x+xdir<=15 && y+ydir<=15){
+            var newx=x-xdir;
+            var newy=y-ydir;
+            if(self._getColor(newx,newy)!=targetColor)
+                break;
+
+            x=newx;
+            y=newy;
+        }
+
+        var fields=[];
+        while(x+xdir>=0 && y+ydir>=0 && x+xdir<=15 && y+ydir<=15){
+            fields.push([x,y]);
+            var x=x+xdir;
+            var y=y+ydir;
+            if(self._getColor(x,y)!=targetColor)
+                break;
+        }
+
+        if(fields.length<5)
+            return;
+
+        for(var fieldId in fields){
+            var field=fields[fieldId];
+            var cell=document.getElementById(self._cell_id(field[0],field[1]));
+            $(cell).parent().addClass('winning_move');
+        }
+    }
+
+    self._getColor = function(x,y){
+        var cell=document.getElementById(self._cell_id(x,y));
+
+        if(cell==null || cell.className==null)
+            return 0;
+
+        if(cell.className.includes("cross"))
+            return 1;
+
+        if(cell.className.includes("circle"))
+            return -1;
+
+        return 0;
     }
 
     self._choose_board = function(response=null){

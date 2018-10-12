@@ -12,6 +12,10 @@
     top:-30px;
 }
 
+.winning_move{
+    background-color:yellow!important;
+}
+
 .live_board{
     position:relative;
     width:90%;
