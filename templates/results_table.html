@@ -11,13 +11,15 @@
 {% for r in scores %}
 <tr class="clickable-row" data-href="/profile/{{r.username}}">
     <td>
-        {% if r.is_online %}
-        <img src="/static/online-icon.png" class="status_icon">
-        {% else %}
-        <img src="/static/offline-icon.png" class="status_icon">
-        {% endif %}
+        <div class="user_td">
+            {% if r.is_online %}
+            <img src="/static/online-icon.png" class="status_icon">
+            {% else %}
+            <img src="/static/offline-icon.png" class="status_icon">
+            {% endif %}
 
-        {{r.username}}
+            {{r.username}}
+        </div>
     </td>
     <td>{{'%0.0f' % r.rating}}</td>
     <td>{{r.wins}}</td>

@@ -44,6 +44,11 @@
     margin: 180px 10px;
 }
 
+.user_td{
+    overflow:hidden;
+    white-space:nowrap;
+}
+
 .board_cell_wrapper {
     position:relative;
     width: calc(100%/15);
