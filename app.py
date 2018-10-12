@@ -1,5 +1,6 @@
 import datetime
 import json
+import sys
 
 from flask import Flask, render_template, request
 from flask_bootstrap import Bootstrap
@@ -7,10 +8,15 @@ from flask_bootstrap import Bootstrap
 from networking.server import Server
 from score_record import ScoreRecord
 
-server_port_start = 5225
+if len(sys.argv) != 4:
+    raise ValueError("Needs 3 arguments. http_port, arena_port, arena_name");
 
-server = Server()
-server.listen(server_port_start + 1)
+arena_name = str(sys.argv[1])
+arena_port = int(sys.argv[2])
+http_port = int(sys.argv[3])
+
+server = Server(arena_name)
+server.listen(arena_port)
 
 app = Flask(__name__)
 app.secret_key = b'fer234\n\xec]/'
@@ -65,4 +71,4 @@ def timectime(s):
 
 
 if __name__ == "__main__":
-    app.run(debug=False, use_reloader=False, host='0.0.0.0', port=5233)
+    app.run(debug=False, use_reloader=False, host='0.0.0.0', port=http_port)

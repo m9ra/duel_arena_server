@@ -11,8 +11,8 @@ class Server(object):
     def arena(self):
         return self._arena
 
-    def __init__(self):
-        self._arena = Arena("debug_arena")
+    def __init__(self, arena_name):
+        self._arena = Arena(arena_name)
 
     def listen(self, port):
         Thread(target=self._accept_clients, args=[port], daemon=True).start()
