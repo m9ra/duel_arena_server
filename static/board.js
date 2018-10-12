@@ -132,7 +132,7 @@ Board = function(target_element_id){
         var targetColor=self._getColor(x,y);
 
         // find start of the direction
-        while(x+xdir>=0 && y+ydir>=0 && x+xdir<=15 && y+ydir<=15){
+        while(x-xdir>=0 && y-ydir>=0 && x-xdir<=15 && y-ydir<=15){
             var newx=x-xdir;
             var newy=y-ydir;
             if(self._getColor(newx,newy)!=targetColor)
