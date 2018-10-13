@@ -31,6 +31,7 @@ var LiveManager = function(boardIds, websocketPort){
             var boardData = data["board"];
             board.clear();
             board.players(boardData["player1"], boardData["player2"]);
+            board.setTarget("/board/" + boardData["_id"]);
             idToBoard[boardData["_id"]] = board;
 
             // in case board came with some moves already, play them

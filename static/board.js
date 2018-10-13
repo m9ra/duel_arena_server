@@ -3,7 +3,8 @@ var FOLLOWED_IDS = new Set();
 Board = function(target_element_id){
     var self = {};
     self._moves = [];
-    self._current_move_index=0;
+    self._current_move_index = 0;
+    self._currentTarget = null;
 
     self._cell_id = function(x,y){
         return target_element_id+"-"+String(x)+"-"+String(y);
@@ -26,6 +27,14 @@ Board = function(target_element_id){
                 cellWrapper.appendChild(cell);
                 row.appendChild(cellWrapper);
             }
+        }
+
+        $(el).click(self._navigateToTarget);
+    }
+
+    self._navigateToTarget = function(){
+        if(self._currentTarget){
+            window.location = self._currentTarget;
         }
     }
 
@@ -101,7 +110,9 @@ Board = function(target_element_id){
         $(p2Label).text(p2);
     }
 
-
+    self.setTarget = function(targetLink){
+        self._currentTarget = targetLink;
+    }
 
     self.clear = function(){
         for(var moveId in self._moves){
