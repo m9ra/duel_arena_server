@@ -52,6 +52,7 @@ def run_listener(websocket_port):
 
 
 def _sender():
+    asyncio.set_event_loop(asyncio.new_event_loop())
     while True:
         data = _data_to_send.get()
         if not data:
