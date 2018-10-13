@@ -41,7 +41,7 @@
 .live_board{
     position:relative;
     width:90%;
-    margin: 180px 10px;
+    margin: 180px 10px 0 10px;
 }
 
 .user_td{
