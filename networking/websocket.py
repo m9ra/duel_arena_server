@@ -1,3 +1,4 @@
+import asyncio
 import json
 from queue import Queue
 from threading import Thread, RLock
@@ -34,6 +35,7 @@ def broadcast(data):
 
 def run_listener(websocket_port):
     def _run():
+        asyncio.set_event_loop(asyncio.new_event_loop())
         application = tornado.web.Application([
             (r'/ws', WSHandler),
         ])
