@@ -60,5 +60,8 @@ def _sender():
 
         json_data = json.dumps(data)
         with _L_websockets:
-            for client in _clients:
-                client.write_message(json_data)
+            for client in list(_clients):
+                try:
+                    client.write_message(json_data)
+                except Exception:
+                    _clients.remove(client)
