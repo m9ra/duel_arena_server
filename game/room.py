@@ -1,3 +1,4 @@
+import time
 from threading import Thread
 
 from configuration import MOVE_TIMEOUT, BOARD_SIZE, WIN_LENGTH
@@ -47,7 +48,16 @@ class Room():
 
         other_player = self._other(player)
 
-        x, y = player.get_move(board, MOVE_TIMEOUT)
+        tolerant_move_timeout = MOVE_TIMEOUT * 1.1
+        move_start = time.time()
+        x, y = player.get_move(board, tolerant_move_timeout)
+        move_end = time.time()
+
+        if move_end - move_start > tolerant_move_timeout:
+            print("Too long move detected.")
+            x = None
+            y = None
+
         if not board.make_move(x, y):
             # invalid move or disconnection
             self._arena.report_invalid_move(player, x, y, board)
