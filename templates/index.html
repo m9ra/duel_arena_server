@@ -25,7 +25,11 @@
             <div id="live_board2" class="live_board"></div>
         </div>
 
+        <script src="{{ url_for('static', filename='live_manager.js') }}"></script>
         <script language="JavaScript">
+
+
+
 function loadTable(){
  $('#results_table').load('/results_table', function(){
         $(".clickable-row").click(function() {
@@ -36,14 +40,8 @@ function loadTable(){
 setInterval(loadTable, 1000)
 loadTable();
 
-var b1=Board('live_board1');
-b1.follow();
-
-var b2=Board('live_board2');
-b2.follow();
-
-
-
+var manager = LiveManager(['live_board1','live_board2'],{{websocket_port}});
+manager.start();
 
 
         </script>

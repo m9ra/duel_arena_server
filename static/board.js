@@ -4,7 +4,6 @@ Board = function(target_element_id){
     var self = {};
     self._moves = [];
     self._current_move_index=0;
-    self._followedId = 0;
 
     self._cell_id = function(x,y){
         return target_element_id+"-"+String(x)+"-"+String(y);
@@ -102,11 +101,9 @@ Board = function(target_element_id){
         $(p2Label).text(p2);
     }
 
-    self.follow = function(){
-        self._choose_board();
-    }
 
-    self._clear = function(){
+
+    self.clear = function(){
         for(var moveId in self._moves){
             var move=self._moves[moveId];
             var x=move[0];
@@ -174,76 +171,6 @@ Board = function(target_element_id){
             return -1;
 
         return 0;
-    }
-
-    self._choose_board = function(response=null){
-        var selectedBoard = self._select_board(response);
-
-        if(response!=null){
-            if(selectedBoard!=null){
-                self._clear();
-
-                FOLLOWED_IDS.delete(self._followedId);
-                self._followedId=selectedBoard["_id"];
-
-                FOLLOWED_IDS.add(self._followedId);
-
-                self.players(selectedBoard["player1"],selectedBoard["player2"]);
-                self._follow_update(selectedBoard);
-            }else{
-                setTimeout(self._choose_board, 1000);
-            }
-
-            return;
-        }
-
-        $.ajax({
-            method: "GET",
-            url: "/live_board",
-            dataType: "json",
-            data: {}
-        }).done(self._choose_board).error(function(){
-            self._choose_board({});
-        });
-    }
-
-    self._select_board = function(response){
-        if(response==null || !("boards" in response))
-            return null;
-
-        var moveCount=1000;
-        var selectedBoard=null;
-        var boards=response["boards"];
-        for(var id in boards){
-            var board=boards[id];
-            if(FOLLOWED_IDS.has(board["_id"]))
-                continue;
-
-            if(board["moves"].length<moveCount){
-                moveCount=board["moves"].length;
-                selectedBoard=board;
-            }
-        }
-        return selectedBoard;
-    }
-
-    self._follow_update = function(response){
-        if("finished_board" in response){
-            self.loadMoves(response["finished_board"]["moves"].slice(self._moves.length));
-            setTimeout(self._choose_board, 5000);
-            return;
-        }
-
-        if("moves" in response){
-            self.loadMoves(response["moves"]);
-        }
-
-        $.ajax({
-            method: "GET",
-            url: "/live_board",
-            dataType: "json",
-            data: { id: self._followedId, move: self._moves.length}
-        }).done(self._follow_update).error(self._choose_board);
     }
 
     self._getPlayerLabel = function(tag){
