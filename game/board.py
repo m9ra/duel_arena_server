@@ -91,6 +91,7 @@ class Board(object):
 
         return True
 
+
     def check_win(self, x, y):
         for direction in self.directions:
             segment = self.get_segment(x, y, direction, self._win_length)
@@ -100,6 +101,18 @@ class Board(object):
         return False
 
     def get_segment(self, x, y, direction, centered_halflength):
+        curr_x = x - direction[0] * centered_halflength
+        curr_y = y - direction[1] * centered_halflength
+
+        segment = []
+        for i in range(centered_halflength * 2 + 1):
+            segment.append(self.get_color(curr_x, curr_y))
+            curr_x += direction[0]
+            curr_y += direction[1]
+
+        return segment
+
+    def get_my_segment(self, x, y, direction, centered_halflength):
         curr_x = x - direction[0] * centered_halflength
         curr_y = y - direction[1] * centered_halflength
 
